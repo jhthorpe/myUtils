@@ -1,5 +1,5 @@
 !/////////////////////////////////////////////////////////////////////
-!//             Library of useful functions in Fortran 90 
+!//            		Says hello 
 !//
 !//                     James H Thorpe, in Group of John Stanton
 !//                     The University of Florida
