@@ -1,0 +1,22 @@
+FC=gfortran
+FFLAGS=-O2 -fcheck=bounds
+
+export $(FC) $(FFLAGS)
+
+bindir:= bin
+progdirs:= src
+
+.PHONY: all
+
+all:
+prog:
+	@set -e; \
+	for i in $(progdirs); do \
+		if [ -d $$i ]; then \
+			if [ -f $$i/Makefile ]; then \
+				$(MAKE) -C $$i all;\
+			fi; \
+		fi; \
+	done;
+
+

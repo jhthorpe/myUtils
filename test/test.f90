@@ -1,0 +1,6 @@
+PROGRAM test
+  IMPLICIT NONE
+
+  CALL say_hi()
+
+END PROGRAM
