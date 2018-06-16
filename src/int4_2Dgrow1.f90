@@ -1,30 +1,16 @@
-PROGRAM test
+!/////////////////////////////////////////////////////////////////////
+!//		Double first dimension of int(kind=4),2D array 
+!//
+!//                     James H Thorpe, in Group of John Stanton
+!//                     The University of Florida
+!//
+!//		
+!/////////////////////////////////////////////////////////////////////
+
+SUBROUTINE int4_2Dgrow1(A)
   IMPLICIT NONE
-  integer(kind=4), dimension(:,:) , allocatable :: A
-  integer :: k
-
-  CALL say_hi()
-  k=5
-
-  allocate(A(0:5,10:20))
-  A(1,11) = -42
-
-  WRITE(*,*) LBOUND(A,1)
-  WRITE(*,*) LBOUND(A,2)
-
-  write(*,*) ALLOCATED(A)
-
-  WRITE(*,*) 
-  WRITE(*,*) "k is:", k
-!  k =  hmm(k)
-  WRITE(*,*) "k is now"
-
-  !CALL int4_2Dgrow1(A)
-  CONTAINS
-
-SUBROUTINE int4_2Dgrowf1(A)
-  IMPLICIT NONE
-  INTEGER(KIND=4), ALLOCATABLE, DIMENSION(:,:), INTENT(INOUT) :: A
+  !INTEGER(KIND=4), ALLOCATABLE, DIMENSION(:,:), INTENT(INOUT) :: A
+  INTEGER(KIND=4), ALLOCATABLE, INTENT(INOUT) :: A(:,:)
   INTEGER(KIND=4), ALLOCATABLE, DIMENSION(:,:) :: B
   INTEGER :: stat,n,m,i,j,k,l1,l2,u1,u2
   !get shape of A
@@ -63,6 +49,5 @@ SUBROUTINE int4_2Dgrowf1(A)
     END DO
     DEALLOCATE(B)
   END IF
-END SUBROUTINE int4_2Dgrowf1
+END SUBROUTINE int4_2Dgrow1
 
-END PROGRAM
