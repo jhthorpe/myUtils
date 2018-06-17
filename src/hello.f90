@@ -5,7 +5,9 @@
 !//                     The University of Florida
 !//
 !/////////////////////////////////////////////////////////////////////
-
-SUBROUTINE say_hi()
-  WRITE(*,*) "Hello World"
-END SUBROUTINE say_hi
+MODULE hello
+  CONTAINS
+  SUBROUTINE say_hi()
+    WRITE(*,*) "Hello World"
+  END SUBROUTINE say_hi
+END MODULE hello
