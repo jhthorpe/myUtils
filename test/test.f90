@@ -11,9 +11,15 @@ PROGRAM test
   A(1,11) = -42
 
   WRITE(*,*) LBOUND(A,1)
+  WRITE(*,*) UBOUND(A,1)
   WRITE(*,*) LBOUND(A,2)
+  WRITE(*,*) UBOUND(A,2)
 
   write(*,*) ALLOCATED(A)
 
   CALL int4_2Dgrow1(A)
+  WRITE(*,*) LBOUND(A,1)
+  WRITE(*,*) UBOUND(A,1)
+  WRITE(*,*) LBOUND(A,2)
+  WRITE(*,*) UBOUND(A,2)
 END PROGRAM

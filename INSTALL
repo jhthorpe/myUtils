@@ -1,1 +1,1 @@
-Compile with 'make all'. To use with your code, either add the library to /usr/local/lib, or compile with the .a file stored in your chosen directory (defined within Makefile) 
+Compile with 'make all'. 
