@@ -54,7 +54,7 @@ MODULE dynamic_arrays
       END IF
 
       !resize
-      ALLOCATE(A(l1:(u1-l1)+u1,l2:u2),STAT=stat)
+      ALLOCATE(A(l1:(u1-l1)+u1+1,l2:u2),STAT=stat)
       IF (stat .NE. 0) THEN
         WRITE(*,*) "myUtil:int4_2Dgrow1 - could not allocate array A"
         STOP
@@ -111,7 +111,7 @@ MODULE dynamic_arrays
       END IF
 
       !resize
-      ALLOCATE(A(l1:(u1-l1)+u1),STAT=stat)
+      ALLOCATE(A(l1:(u1-l1)+u1+1),STAT=stat)
       IF (stat .NE. 0) THEN
         WRITE(*,*) "myUtil:chr8_1Dgrow - could not allocate array A"
         STOP
@@ -170,7 +170,7 @@ MODULE dynamic_arrays
       END IF
 
       !resize
-      ALLOCATE(A(l1:(u1-l1)+u1,l2:u2),STAT=stat)
+      ALLOCATE(A(l1:(u1-l1)+u1+1,l2:u2),STAT=stat)
       IF (stat .NE. 0) THEN
         WRITE(*,*) "myUtil:real8_2Dgrow1 - could not allocate array A"
         STOP
@@ -234,7 +234,7 @@ MODULE dynamic_arrays
       END IF
 
       !resize
-      ALLOCATE(A(l1:(u1-l1)+u1,l2:u2,l3:u3),STAT=stat)
+      ALLOCATE(A(l1:(u1-l1)+u1+1,l2:u2,l3:u3),STAT=stat)
       IF (stat .NE. 0) THEN
         WRITE(*,*) "myUtil:real8_3Dgrow1 - could not allocate array A"
         STOP
@@ -273,6 +273,85 @@ MODULE dynamic_arrays
     END DO
 
   END SUBROUTINE real8_2Dzero
+
+!---------------------------------------------------------------------
+!	bool_2Dgrow1
+!               James H. Thorpe
+!               June 18, 2018
+!       -double the first dimension of a 2D boolean array 
+!       -note that this makes all new elements .F.
+!---------------------------------------------------------------------
+  ! Variables
+  ! A           :       2D bool, the table 
+  ! c           :       bool, T = grow down, F = grow up
+
+  SUBROUTINE bool_2Dgrow1(A,c)
+  IMPLICIT NONE
+  LOGICAL, DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: A
+  LOGICAL, INTENT(IN) :: c
+  LOGICAL, DIMENSION(:,:), ALLOCATABLE :: B
+  INTEGER :: stat,i,j,k,l1,u1,l2,u2
+
+  !get shape
+  l1 = LBOUND(A,1)   
+  u1 = UBOUND(A,1)
+  l2 = LBOUND(A,2)   
+  u2 = UBOUND(A,2)
+ 
+  IF (.NOT. ALLOCATED(A)) THEN
+    WRITE(*,*) "myUtil:bool_2Dgrow1 - array A not allocated"
+    STOP
+  END IF
+
+  !temp copy
+  ALLOCATE(B(l1:u1,l2:u2),STAT=stat)
+  IF (stat .NE. 0) THEN
+    WRITE(*,*) "myUtil:bool_2Dgrow1 - could not allocate array B"
+    STOP
+  END IF
+
+  B = A
+
+  DEALLOCATE(A,STAT=stat)
+  IF (stat .NE. 0) THEN
+    WRITE(*,*) "myUtil:bool_2Dgrow1 - could not deallocate array A"
+    STOP
+  END IF
+
+  !resize
+  IF (c) THEN !we go down
+
+    ALLOCATE(A(l1-(u1-l1)-1:u1,l2:u2),STAT=stat)
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "myUtil:bool_2Dgrow1 - could not reallocate array A"
+      STOP
+    END IF
+
+    !move data
+    DO j=l2,u2
+      A(l1-(u1-l1)-1:l1-1,j) = (/ ( .FALSE. , i=l1-(u1-l1)-1,l1-1) /)
+      A(l1:u1,j) = (/ ( B(i,j), i=l1,u1 ) /)
+    END DO
+
+  ELSE !we go up
+
+    ALLOCATE(A(l1:u1+(u1-l1)+1,l2:u2),STAT=stat)
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "myUtil:bool_2Dgrow1 - could not reallocate array A"
+      STOP
+    END IF
+
+    DO j=l2,u2
+      A(l1:u1,j) = (/ ( B(i,j) , i=l1, u1) /)
+      A(u1+1:u1+(u1-l1)+1,j) = (/ ( .FALSE. , i=u1+1, u1+(u1-l1)+1 ) /)
+    END DO
+
+  END IF
+
+  DEALLOCATE(B)
+
+END SUBROUTINE bool_2Dgrow1 
+
 
 !---------------------------------------------------------------------
 END MODULE dynamic_arrays
