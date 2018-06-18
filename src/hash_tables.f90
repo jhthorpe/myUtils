@@ -41,13 +41,13 @@ MODULE hash_tables
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B 
     LOGICAL, DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
     INTEGER(KIND=4), INTENT(INOUT) :: n,m
-    INTEGER(KIND=4 :: i,stat
+    INTEGER(KIND=4) :: i,stat
 
     !get next largest power of two via bitops - no lookup required!
     !"https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2"
     n = n - 1 
-    DO i=0,bit_size(n)
-      n = ior(n, ishft(n, -(2**i)) 
+    DO i=0,BIT_SIZE(n)
+      n = IOR(n, ISHFT(n, -(2**i))) 
     END DO 
     n = n + 1
    
@@ -72,7 +72,7 @@ MODULE hash_tables
       STOP
     END IF
 
-  END SUBROUTINE has_qinit_1Dint4_bool
+  END SUBROUTINE hash_qinit_1Dint4_bool
 
 !---------------------------------------------------------------------
 !       hash_qinsert_1Dint4_bool        
@@ -80,6 +80,7 @@ MODULE hash_tables
 !               June 16, 2018
 !       - insert key value pair for key:1Dint4, value:bool array
 !       - quadratic probing
+!       - use fancy bitops for modules, as we know we have 2^n size
 !---------------------------------------------------------------------
   ! Varaibles
   ! A           :       1D bool, hash table (T,F array)
@@ -87,20 +88,31 @@ MODULE hash_tables
   ! C           :       1D bool, hashed values
   ! key         :       1D int4, key to insert       
   ! val         :       bool, values to insert
+  ! idx         :       int4, result of has function, between 0 and 2^n-1
+  ! m           :       int4, size of the matrix
 
-  SUBROUTINE hash_qinsert_1Dint4_bool(A,B,C,key,val)
+  SUBROUTINE hash_qinsert_1Dint4_bool(A,B,C,key,val,idx,m)
     IMPLICIT NONE
     INTEGER(KIND=4), DIMENSION(0:,0:), INTENT(INOUT) :: B 
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: key
     LOGICAL, DIMENSION(0:), INTENT(INOUT) :: A,C
+    INTEGER(KIND=4), INTENT(IN) :: idx,m
     LOGICAL, INTENT(IN) :: val
-    INTEGER :: i
-    
-    !find empty slot, quadratic probing 
-    !WHILE( .NOT. A( 
-    
+    INTEGER(KIND=4) :: j,k,i
 
-  END SUBROUTINE has_qinsert_1Dint4_bool
+    j = 1    
+    k = idx
+    i = IAND(k,m-1) !bitwise modulus of 2^n, fancy stuff :) 
+
+    !find empty slot, quadratic probing 
+    DO WHILE (A(i) .EQV. .TRUE.)
+      i = IAND(k,m-1)
+      IF ( ALL(B(i,:) .EQ. key(:) ) ) EXIT
+      k = k + j  
+      j = j + 1
+    END DO 
+    
+  END SUBROUTINE hash_qinsert_1Dint4_bool
 
 !---------------------------------------------------------------------
 
