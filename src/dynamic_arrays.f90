@@ -6,6 +6,11 @@
 !//
 !/////////////////////////////////////////////////////////////////////
 
+! GENERAL STRUCUTRE
+!       type_#D/operation/dimension
+!       example: grow the 1st dimension of an int4 2D array
+!               int4_2Dgrow1 
+
 
 MODULE dynamic_arrays
 
