@@ -19,7 +19,7 @@ Currently supported dynamic functions:
 - real8_3Dgrow1		:	double first dimension of 3D real(kind=8)  
 
 ## Hash Tables
-A set of functions that impliment dynamic hash tables. The user can define their own hash function, which is passed in as an arguement. Everything else is completely abstracted from the user's concern.   
+A set of functions that implement dynamic hash tables. The user can define their own hash function, which is passed in as an arguement. Everything else is completely abstracted from the user's concern.   
 Syntax:  
 	hash_operation_keyKind_valKind  
 Currently supported hash functions:
