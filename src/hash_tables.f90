@@ -120,8 +120,6 @@ MODULE hash_tables
 
     !get initial guess index
     idx = hash_1Dint4(key)
-    write(*,*) "n is", n
-    write(*,*) "search: idx is ", idx, "mod is", IAND(idx,n-1)
 
     j = 1    
     k = idx
@@ -182,7 +180,7 @@ MODULE hash_tables
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: nB
     LOGICAL, DIMENSION(:), ALLOCATABLE:: nA,nC
     INTEGER(KIND=4), INTENT(INOUT) :: n
-    INTEGER(KIND=4) :: i,m,stat,l,k
+    INTEGER(KIND=4) :: i,m,stat,l
 
     n = 2*n
     m = SIZE(B(0,:))
@@ -193,9 +191,7 @@ MODULE hash_tables
     !rehash
     DO i=0,(n/2)-1
       IF ( A(i) .EQV. .TRUE.) THEN
-        l = i
         CALL hash_qinsert_1Dint4_bool(nA,nB,nC,B(i,:),C(i),l,n,0,hash_1Dint4)
-        WRITE(*,*) "key:", B(i,:), "was ", i, "is now ", l 
       END IF 
     END DO
 

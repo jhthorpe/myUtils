@@ -8,7 +8,7 @@ PROGRAM test
   integer :: k,n,m,q,loc
 
 
-  n = 8
+  n = 10
   m = 4
   val = .TRUE.
   call hash_qinit_1Dint4_bool(A,B,C,n,m)
@@ -38,35 +38,46 @@ PROGRAM test
   call hash_qinsert_1Dint4_bool(A,B,C,key,val,loc,n,q,myHash2)
 
 
-  write(*,*) 
-  write(*,*) "B(0,:) is"
-  write(*,*) B(0,:)
-  write(*,*) B(1,:)
-  write(*,*) B(2,:)
-  write(*,*) B(3,:)
-  write(*,*) 
-  write(*,*) 
-
-  loc = 2
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
-  write(*,*) "key =", key, "idx = ", loc, "val = ", val
-  write(*,*) 
-
-  loc = 2
-  call hash_qrehash_1Dint4_bool(A,B,C,n,myHash2)
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  WRITE(*,*) 
+  write(*,*) "B(i,:) is"
+  DO k=0,n
+    write(*,*) B(k,:)
+  end do
   WRITE(*,*)
-  write(*,*) "key =", key, "idx = ", loc, "val = ", val
 
+  WRITE(*,*) "search before rehash"
+  key = [0,0,0,42]
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  key = [0,24,0,42]
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  key = [0,24,23,42]
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+
+  call hash_qrehash_1Dint4_bool(A,B,C,n,myHash2)
+
+  WRITE(*,*) "search after rehash"
+  key = [0,0,0,42]
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  key = [0,24,0,42]
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  key = [0,24,23,42]
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+
+  write(*,*) 
+  write(*,*) "B(k,:) is"
+  DO k=0,n
+    write(*,*) B(k,:)
+  end do
   contains
 
   integer(kind=4) function myHash2(A)
     implicit none
     integer(kind=4), dimension(0:), intent(IN) :: A
     
-    myHash2 = SUM(A)
+    myHash2 = A(2)+1
 
   end function myHash2
 
   
 END PROGRAM
+
