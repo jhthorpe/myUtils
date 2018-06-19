@@ -8,7 +8,7 @@ PROGRAM test
   integer :: k,n,m
 
 
-  n = 2
+  n = 34
   m = 27
   val = .TRUE.
   call hash_qinit_2Dint4_bool(A,B,C,n,m)
@@ -29,6 +29,10 @@ PROGRAM test
   call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
 
   write(*,*) B(0,:)
+
+  key(12) = 44
+  call hash_qsearch_2Dint4_bool(B,C,key,val,10,n)
+  write(*,*) "key at at: ",val
 
   
 END PROGRAM

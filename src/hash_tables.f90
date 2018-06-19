@@ -19,7 +19,7 @@ MODULE hash_tables
 !       hash_qinit_1Dint4_bool        
 !               James H. Thorpe
 !               June 18, 2018
-!       - initialize hash tables for key:1Dint4, value: bool array 
+!       - initialize hash tables for key:2Dint4, value: bool array 
 !       - builds as m=2^p, m > n, the users minimum size request 
 !       - this allows it to be compatible with my quadratic hashing
 !       - on input, n is the minimum size of the array
@@ -78,7 +78,7 @@ MODULE hash_tables
 !       hash_qinsert_1Dint4_bool        
 !               James H. Thorpe
 !               June 18, 2018
-!       - insert key value pair for key:1Dint4, value:bool array
+!       - insert key value pair for key:2Dint4, value:bool array
 !       - quadratic probing
 !       - use fancy bitops for modules, as we know we have 2^n size
 !---------------------------------------------------------------------
@@ -120,17 +120,59 @@ MODULE hash_tables
     END DO 
 
     !if we got out, then we have any empty slot
-    WRITE(*,*) 
-    WRITE(*,*) LBOUND(B,1), UBOUND(B,1)
-    WRITE(*,*) LBOUND(B,2), UBOUND(B,2)
     A(i) = .TRUE.
     B(i,:) = key(:)
     C(i) = val
 
-    WRITE(*,*) "Found at i=",i
-      
-    
   END SUBROUTINE hash_qinsert_2Dint4_bool
+
+!---------------------------------------------------------------------
+!       hash_qsearch_2Dint4_bool        
+!               James H. Thorpe
+!               June 18, 2018
+!       - find key:values pair for key:2Dint4, value:bool array
+!       - quadratic probing
+!       - use fancy bitops for modules, as we know we have 2^n size
+!---------------------------------------------------------------------
+  ! Varaibles
+  ! A           :       1D bool, hash table (T,F array)
+  ! B           :       2D int4, hashed keys (index,key)
+  ! C           :       1D bool, hashed values
+  ! key         :       1D int4, key to insert       
+  ! val         :       bool, values to insert
+  ! idx         :       int4, result of has function, between 0 and 2^n-1
+  ! n           :       int4, size of the matrix
+
+  SUBROUTINE hash_qsearch_2Dint4_bool(B,C,key,val,idx,n)
+    IMPLICIT NONE
+    INTEGER(KIND=4), DIMENSION(0:,0:), INTENT(INOUT) :: B 
+    INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: key
+    LOGICAL, DIMENSION(0:), INTENT(INOUT) :: C
+    INTEGER(KIND=4), INTENT(IN) :: idx,n
+    LOGICAL, INTENT(INOUT) :: val
+    INTEGER(KIND=4) :: j,k,i,l
+
+    j = 1    
+    k = idx
+    i = IAND(k,n-1) !bitwise modulus of 2^n, fancy stuff :) 
+    l = -1
+
+    !find empty slot, quadratic probing 
+    DO WHILE ( .NOT. ALL(B(i,:) .EQ. key(:) ) )
+      IF ( l .EQ. i) THEN       !the full cycle has been searched, quadratic ftw
+        WRITE(*,*) "myUtil:hash_qsearch_2Dint4_bool - key not found" 
+        STOP
+      END IF
+      k = k + j  
+      j = j + 1
+      l = i
+      i = IAND(k,n-1)
+    END DO 
+
+    !if we got out, then we have any empty slot
+    val = C(i)
+    
+  END SUBROUTINE hash_qsearch_2Dint4_bool
 
 !---------------------------------------------------------------------
 
