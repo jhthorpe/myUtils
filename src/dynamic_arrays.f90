@@ -77,6 +77,23 @@ MODULE dynamic_arrays
   END SUBROUTINE int4_2Dgrow1
 
 !---------------------------------------------------------------------
+!	int4_1Dzero
+!               James H. Thorpe
+!               June 17, 2018
+!       -zero the elements of a int4 2D array
+!---------------------------------------------------------------------
+! Variables
+!       A       :       1D int4, array to be zeroed
+
+  SUBROUTINE int4_1Dzero(A)
+    IMPLICIT NONE
+    INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: A
+
+    A = 0
+
+  END SUBROUTINE int4_1Dzero
+
+!---------------------------------------------------------------------
 !	chr8_1Dgrow
 !               James H. Thorpe
 !               June 17, 2018
