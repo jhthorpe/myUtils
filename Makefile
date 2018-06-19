@@ -1,5 +1,5 @@
 FC=gfortran
-FFLAGS=-O3 -fcheck=bounds
+FFLAGS=-O3 -fcheck=bounds -g
 LFLAGS=-rcs
 LC=ar
 

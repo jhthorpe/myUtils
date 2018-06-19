@@ -5,10 +5,10 @@ PROGRAM test
   logical, dimension(:),allocatable :: A,C 
   integer(kind=4), dimension(:), allocatable :: key
   logical :: val
-  integer :: k,n,m
+  integer :: k,n,m,q
 
 
-  n = 34
+  n = 2
   m = 27
   val = .TRUE.
   call hash_qinit_2Dint4_bool(A,B,C,n,m)
@@ -21,18 +21,19 @@ PROGRAM test
   key(10) = 42
   WRITE(*,*) "key is..."
   WRITE(*,*) key
-
-  call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
+  
+  q = 1
+  call hash_qinsert_2Dint4_bool(A,B,C,key,val,0,n,q)
   key(11) = 24
-  call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
+  q = q + 1
+  call hash_qinsert_2Dint4_bool(A,B,C,key,val,0,n,q)
   key(11) = 23
-  call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
+  q = q + 1
+  call hash_qinsert_2Dint4_bool(A,B,C,key,val,0,n,q)
 
   write(*,*) B(0,:)
 
-  key(12) = 44
-  call hash_qsearch_2Dint4_bool(B,C,key,val,10,n)
-  write(*,*) "key at at: ",val
+  call hash_qsearch_2Dint4_bool(A,B,C,key,val,0,n)
 
   
 END PROGRAM

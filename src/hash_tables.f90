@@ -90,15 +90,19 @@ MODULE hash_tables
   ! val         :       bool, values to insert
   ! idx         :       int4, result of has function, between 0 and 2^n-1
   ! n           :       int4, size of the matrix
+  ! q           :       int4, current load of matrix
 
-  SUBROUTINE hash_qinsert_2Dint4_bool(A,B,C,key,val,idx,n)
+  SUBROUTINE hash_qinsert_2Dint4_bool(A,B,C,key,val,idx,n,q)
     IMPLICIT NONE
-    INTEGER(KIND=4), DIMENSION(0:,0:), INTENT(INOUT) :: B 
+    INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B 
+    LOGICAL, DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: key
-    LOGICAL, DIMENSION(0:), INTENT(INOUT) :: A,C
-    INTEGER(KIND=4), INTENT(IN) :: idx,n
+    INTEGER(KIND=4), INTENT(INOUT) :: n
+    INTEGER(KIND=4), INTENT(IN) :: q,idx
     LOGICAL, INTENT(IN) :: val
     INTEGER(KIND=4) :: j,k,i,l
+
+    IF ( 1.0E0*q/n .GT. 0.5E0) CALL hash_qrehash_2Dint4_bool(A,B,C,n)
 
     j = 1    
     k = idx
@@ -127,12 +131,92 @@ MODULE hash_tables
   END SUBROUTINE hash_qinsert_2Dint4_bool
 
 !---------------------------------------------------------------------
+!       hash_qrehash_2Dint4_bool        
+!               James H. Thorpe
+!               June 18, 2018
+!       - rehash the hash table after doubling size
+!       - quadratic probing
+!       - use fancy bitops for modulus, as we know we have 2^n size
+!       - changes val to value of pair
+!---------------------------------------------------------------------
+  ! Variables
+  ! A           :       1D bool, hash table (T,F array)
+  ! B           :       2D int4, hashed keys (index,key)
+  ! C           :       1D bool, hashed values
+  ! key         :       1D int4, key to insert       
+  ! val         :       bool, values to insert
+  ! idx         :       int4, result of has function, between 0 and 2^n-1
+  ! n           :       int4, size of the matrix
+
+  SUBROUTINE hash_qrehash_2Dint4_bool(A,B,C,n)
+    IMPLICIT NONE
+    INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B 
+    LOGICAL, DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
+    INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: nB
+    LOGICAL, DIMENSION(:), ALLOCATABLE:: nA,nC
+    INTEGER(KIND=4), INTENT(INOUT) :: n
+    INTEGER(KIND=4) :: i,m,stat
+
+    n = 2*n
+    m = SIZE(B(0,:))
+
+    !create temporary arrays
+    CALL hash_qinit_2Dint4_bool(nA,nB,nC,n,m)
+
+    !rehash
+    DO i=0,(n/2)-1
+      IF ( A(i) .EQV. .TRUE.) THEN
+        CALL hash_qinsert_2Dint4_bool(nA,nB,nC,B(i,:),C(i),i,n,0)
+      END IF 
+    END DO
+
+    !deallocate
+    DEALLOCATE(A,STAT=stat) 
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "muUtil:hash_qrehash_2Dint4_bool - could not deallocate A"
+      STOP
+    END IF
+    DEALLOCATE(B,STAT=stat) 
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "muUtil:hash_qrehash_2Dint4_bool - could not deallocate B"
+      STOP
+    END IF
+    DEALLOCATE(C,STAT=stat) 
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "muUtil:hash_qrehash_2Dint4_bool - could not deallocate C"
+      STOP
+    END IF
+    
+    !reallocate
+    ALLOCATE(A(0:n-1),STAT=stat)
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "muUtil:hash_qrehash_2Dint4_bool - could not reallocate A"
+      STOP
+    END IF
+    A = nA
+    ALLOCATE(B(0:n-1,0:m-1),STAT=stat)
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "muUtil:hash_qrehash_2Dint4_bool - could not reallocate B"
+      STOP
+    END IF
+    B = nB
+    ALLOCATE(C(0:n-1),STAT=stat)
+    IF (stat .NE. 0) THEN
+      WRITE(*,*) "muUtil:hash_qrehash_2Dint4_bool - could not reallocate C"
+      STOP
+    END IF
+    C = nC
+
+  END SUBROUTINE hash_qrehash_2Dint4_bool
+
+!---------------------------------------------------------------------
 !       hash_qsearch_2Dint4_bool        
 !               James H. Thorpe
 !               June 18, 2018
 !       - find key:values pair for key:2Dint4, value:bool array
 !       - quadratic probing
 !       - use fancy bitops for modules, as we know we have 2^n size
+!       - changes val to value of pair
 !---------------------------------------------------------------------
   ! Varaibles
   ! A           :       1D bool, hash table (T,F array)
@@ -143,11 +227,11 @@ MODULE hash_tables
   ! idx         :       int4, result of has function, between 0 and 2^n-1
   ! n           :       int4, size of the matrix
 
-  SUBROUTINE hash_qsearch_2Dint4_bool(B,C,key,val,idx,n)
+  SUBROUTINE hash_qsearch_2Dint4_bool(A,B,C,key,val,idx,n)
     IMPLICIT NONE
-    INTEGER(KIND=4), DIMENSION(0:,0:), INTENT(INOUT) :: B 
+    INTEGER(KIND=4), DIMENSION(0:,0:), INTENT(IN) :: B 
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: key
-    LOGICAL, DIMENSION(0:), INTENT(INOUT) :: C
+    LOGICAL, DIMENSION(0:), INTENT(IN) :: A,C
     INTEGER(KIND=4), INTENT(IN) :: idx,n
     LOGICAL, INTENT(INOUT) :: val
     INTEGER(KIND=4) :: j,k,i,l
@@ -159,7 +243,7 @@ MODULE hash_tables
 
     !find empty slot, quadratic probing 
     DO WHILE ( .NOT. ALL(B(i,:) .EQ. key(:) ) )
-      IF ( l .EQ. i) THEN       !the full cycle has been searched, quadratic ftw
+      IF ( l .EQ. i .OR. A(i) .EQV. .FALSE.) THEN       !the full cycle has been searched, quadratic ftw
         WRITE(*,*) "myUtil:hash_qsearch_2Dint4_bool - key not found" 
         STOP
       END IF
@@ -175,7 +259,6 @@ MODULE hash_tables
   END SUBROUTINE hash_qsearch_2Dint4_bool
 
 !---------------------------------------------------------------------
-
 
 END MODULE hash_tables
 
