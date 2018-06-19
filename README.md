@@ -29,4 +29,4 @@ Currently supported hash functions:
 - hash_qsearch_1Dint4_bool	:	search key:value pair, quadratic probing, 1D integer(kind=4) keys, logical values
   
 A note about hash functions...  
-The quadtractically probed hash functions here are of a special kind. The tables are dynamically resized so that they are always a power of two. This allows us to use fancy bitops to perform expensive modulus operations, and it guarentees that an empty slot will always be found.  
+The quadtractically probed hash functions here are of a special kind. The tables are dynamically resized so that they are always a power of two. This allows us to use fancy bitops to perform expensive modulus operations, and it guarentees that an empty slot will always be found. It should be noted that the table dynamically resizes at a load factor of 0.5, which I am not sure is ideal! 
