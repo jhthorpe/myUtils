@@ -33,6 +33,7 @@ all:
 			fi; \
 		fi; \
 	done;
+	if [ ! -d $(LIB_DIR) ]; then mkdir -p $(LIB_DIR); fi 
 	cp $(SRC_DIR)/*.mod $(LIB_DIR)
 	$(LC) $(LFLAGS) $(LIB_DIR)/myUtils.a $(OBJ_FILES)
 	$(FC) $(FFLAGS) -o ./test/test.o ./test/test.f90 $(LIB_DIR)/myUtils.a -I$(LIB_DIR) 
