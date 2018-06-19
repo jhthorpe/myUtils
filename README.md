@@ -10,8 +10,8 @@ A set of functions useful for dynamically alterning arrays.
 Synatx:  
 	kind_(#D)(operation)(dimension)  
 Currently supported dynamic functions:  
-- bool_2Dgrow1\          :       double first dimension of 2D logical
-- chr8_1Dgrow           :       double size of 1D char(len=8)
+- bool_2Dgrow1		:	double first dimension of 2D logical
+- chr8_1Dgrow		:	double size of 1D char(len=8)
 - int4_2Dgrow1		:	double first dimension of 2D integer(kind=4)
 - int4_1Dzero		:	zero 1D integer(kind=4)
 - real8_2Dgrow1		:	double first dimension of 2D real(kind=8) 	
