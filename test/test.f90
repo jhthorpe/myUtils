@@ -1,25 +1,34 @@
 PROGRAM test
   USE myUtils
   IMPLICIT NONE
-  integer(kind=4), dimension(:,:) , allocatable :: A
-  integer :: k
+  integer(kind=4), dimension(:,:) , allocatable :: B
+  logical, dimension(:),allocatable :: A,C 
+  integer(kind=4), dimension(:), allocatable :: key
+  logical :: val
+  integer :: k,n,m
 
-  CALL say_hi()
-  k=5
 
-  allocate(A(0:5,10:20))
-  A(1,11) = -42
+  n = 2
+  m = 27
+  val = .TRUE.
+  call hash_qinit_2Dint4_bool(A,B,C,n,m)
+  WRITE(*,*) SIZE(A(:))
+  WRITE(*,*) SIZE(B(:,0))
+  WRITE(*,*) SIZE(B(0,:))
+  WRITE(*,*) SIZE(C(:))
 
-  WRITE(*,*) LBOUND(A,1)
-  WRITE(*,*) UBOUND(A,1)
-  WRITE(*,*) LBOUND(A,2)
-  WRITE(*,*) UBOUND(A,2)
+  allocate(key(0:m-1))
+  key(10) = 42
+  WRITE(*,*) "key is..."
+  WRITE(*,*) key
 
-  write(*,*) ALLOCATED(A)
+  call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
+  key(11) = 24
+  call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
+  key(11) = 23
+  call hash_qinsert_2Dint4_bool(A,B(:,:),C,key,val,0,n)
 
-  CALL int4_2Dgrow1(A)
-  WRITE(*,*) LBOUND(A,1)
-  WRITE(*,*) UBOUND(A,1)
-  WRITE(*,*) LBOUND(A,2)
-  WRITE(*,*) UBOUND(A,2)
+  write(*,*) B(0,:)
+
+  
 END PROGRAM
