@@ -112,7 +112,7 @@ MODULE hash_tables
     LOGICAL, DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: key
     INTEGER(KIND=4), INTENT(INOUT) :: n,idx
-    INTEGER(KIND=4), INTENT(IN) :: q
+    INTEGER(KIND=4), INTENT(INOUT) :: q
     LOGICAL, INTENT(IN) :: val
     INTEGER(KIND=4) :: j,k,i,l
 
@@ -145,6 +145,7 @@ MODULE hash_tables
     B(i,:) = key(:)
     C(i) = val
     idx = i
+    q = q + 1
 
   END SUBROUTINE hash_qinsert_1Dint4_bool
 
@@ -180,10 +181,11 @@ MODULE hash_tables
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: nB
     LOGICAL, DIMENSION(:), ALLOCATABLE:: nA,nC
     INTEGER(KIND=4), INTENT(INOUT) :: n
-    INTEGER(KIND=4) :: i,m,stat,l
+    INTEGER(KIND=4) :: i,m,stat,l,q
 
     n = 2*n
     m = SIZE(B(0,:))
+    q = 0
 
     !create temporary arrays
     CALL hash_qinit_1Dint4_bool(nA,nB,nC,n,m)
@@ -191,7 +193,7 @@ MODULE hash_tables
     !rehash
     DO i=0,(n/2)-1
       IF ( A(i) .EQV. .TRUE.) THEN
-        CALL hash_qinsert_1Dint4_bool(nA,nB,nC,B(i,:),C(i),l,n,0,hash_1Dint4)
+        CALL hash_qinsert_1Dint4_bool(nA,nB,nC,B(i,:),C(i),l,n,q,hash_1Dint4)
       END IF 
     END DO
 

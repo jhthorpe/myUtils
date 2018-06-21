@@ -30,7 +30,7 @@ myUtils.mod : myUtils.f90 myUtils.o
 	$(FC) $(FFLAGS) -c $^ -o $@
 
 %.o : %.f90
-	$(FC) $(FFALGS) -c $^ -o $<
+	$(FC) $(FFLAGS) -c $^ -o $<
 
 
 clean: 
