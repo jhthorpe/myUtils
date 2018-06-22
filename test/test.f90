@@ -4,7 +4,7 @@ PROGRAM test
   integer(kind=4), dimension(:,:) , allocatable :: B
   logical, dimension(:),allocatable :: A,C 
   integer(kind=4), dimension(:), allocatable :: key
-  logical :: val
+  logical :: val,fnd
   integer :: k,n,m,q,loc
 
 
@@ -47,21 +47,21 @@ PROGRAM test
 
   WRITE(*,*) "search before rehash"
   key = [0,0,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
   key = [0,24,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
   key = [0,24,23,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
 
   call hash_qrehash_1Dint4_bool(A,B,C,n,myHash2)
 
   WRITE(*,*) "search after rehash"
   key = [0,0,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
   key = [0,24,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
   key = [0,24,23,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
 
   write(*,*) 
   write(*,*) "B(k,:) is"

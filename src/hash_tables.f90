@@ -97,7 +97,7 @@ MODULE hash_tables
   ! key         :       1D int4, key to insert       
   ! val         :       bool, values to insert
   ! n           :       int4, size of the matrix
-  ! q           :       int4, current load of matrix
+  ! q           :       int4, current number of inserted keys 
 
   SUBROUTINE hash_qinsert_1Dint4_bool(A,B,C,key,val,idx,n,q,hash_1Dint4)
     IMPLICIT NONE
@@ -257,8 +257,9 @@ MODULE hash_tables
   ! val         :       bool, values to insert
   ! idx         :       int4, result of has function, between 0 and n=2^p-1
   ! n           :       int4, size of the matrix
+  ! fnd         :       bool, returns if key was found or not
 
-  SUBROUTINE hash_qsearch_1Dint4_bool(A,B,C,key,val,idx,n,hash_1Dint4)
+  SUBROUTINE hash_qsearch_1Dint4_bool(A,B,C,key,val,idx,n,fnd,hash_1Dint4)
     IMPLICIT NONE
 
     INTERFACE
@@ -272,10 +273,11 @@ MODULE hash_tables
     LOGICAL, DIMENSION(0:), INTENT(IN) :: A,C
     INTEGER(KIND=4), INTENT(INOUT) :: idx
     INTEGER(KIND=4), INTENT(IN) :: n
-    LOGICAL, INTENT(INOUT) :: val
+    LOGICAL, INTENT(INOUT) :: val,fnd
     INTEGER(KIND=4) :: j,k,i,l
 
     idx = hash_1Dint4(key)
+    fnd = .FALSE.
 
     j = 1    
     k = idx
@@ -285,8 +287,7 @@ MODULE hash_tables
     !find empty slot, quadratic probing 
     DO WHILE ( .NOT. ALL(B(i,:) .EQ. key(:) ) )
       IF ( l .EQ. i .OR. A(i) .EQV. .FALSE.) THEN       !the full cycle has been searched, quadratic ftw
-        WRITE(*,*) "myUtil:hash_qsearch_1Dint4_bool - key not found" 
-        STOP
+        RETURN 
       END IF
       k = k + j  
       j = j + 1
@@ -297,6 +298,7 @@ MODULE hash_tables
     !if we got out, then we have any empty slot
     val = C(i)
     idx = i
+    fnd = .TRUE.
     
   END SUBROUTINE hash_qsearch_1Dint4_bool
 
