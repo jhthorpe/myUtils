@@ -194,7 +194,6 @@ MODULE hash_tables
     i = IAND(k,n-1) !bitwise modulus of size n=2^p, fancy stuff :) 
     l = -1
 
-    x = 0
     !find empty slot, quadratic probing 
     DO WHILE (A(i) .EQV. .TRUE.)
       IF ( l .EQ. i) THEN       !the full cycle has been searched, quadratic ftw
