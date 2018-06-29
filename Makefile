@@ -1,4 +1,5 @@
 FC=gfortran
+#FC=ifort
 FFLAGS=-O3 -fcheck=bounds
 LFLAGS=-rcs
 LC=ar

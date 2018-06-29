@@ -150,6 +150,76 @@ MODULE hash_tables
   END SUBROUTINE hash_qinsert_1Dint4_bool
 
 !---------------------------------------------------------------------
+!       hash_qinsert_1Dint4_bool_coll        
+!               James H. Thorpe
+!               June 18, 2018
+!       - insert key value pair for key:1Dint4, value:bool array
+!       - quadratic probing
+!       - use fancy bitops for modules, as we know we have n=2^p size
+!       - tracks number of collisions
+!---------------------------------------------------------------------
+  ! Varaibles
+  ! A           :       1D bool, hash table (T,F array)
+  ! B           :       2D int4, hashed keys (index,key)
+  ! C           :       1D bool, hashed values
+  ! key         :       1D int4, key to insert       
+  ! val         :       bool, values to insert
+  ! n           :       int4, size of the matrix
+  ! q           :       int4, current number of inserted keys 
+  ! x           :       int4, number of collisions
+
+  SUBROUTINE hash_qinsert_1Dint4_bool_col(A,B,C,key,val,idx,n,q,hash_1Dint4,x)
+    IMPLICIT NONE
+
+    INTERFACE
+      INTEGER(KIND=4) FUNCTION hash_1Dint4(A)
+        INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: A
+      END FUNCTION hash_1Dint4
+    END INTERFACE
+
+    INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B 
+    LOGICAL, DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
+    INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: key
+    INTEGER(KIND=4), INTENT(INOUT) :: n,idx,q,x
+    LOGICAL, INTENT(IN) :: val
+    INTEGER(KIND=4) :: j,k,i,l
+
+    IF ( 1.0E0*q/n .GT. 0.5E0) CALL hash_qrehash_1Dint4_bool(A,B,C,n,hash_1Dint4)
+
+    !get initial guess index
+    idx = hash_1Dint4(key)
+
+    j = 1    
+    k = idx
+    i = IAND(k,n-1) !bitwise modulus of size n=2^p, fancy stuff :) 
+    l = -1
+
+    x = 0
+    !find empty slot, quadratic probing 
+    DO WHILE (A(i) .EQV. .TRUE.)
+      IF ( l .EQ. i) THEN       !the full cycle has been searched, quadratic ftw
+        WRITE(*,*) "myUtil:hash_qinsert_1Dint4_bool - no insertion point found"
+        STOP
+      ELSE IF ( ALL(B(i,:) .EQ. key(:) ) ) THEN !key already exists
+        RETURN
+      END IF
+      k = k + j  
+      j = j + 1
+      x = x + 1
+      l = i
+      i = IAND(k,n-1)
+    END DO 
+
+    !if we got out, then we have any empty slot
+    A(i) = .TRUE.
+    B(i,:) = key(:)
+    C(i) = val
+    idx = i
+    q = q + 1
+
+  END SUBROUTINE hash_qinsert_1Dint4_bool_col
+
+!---------------------------------------------------------------------
 !       hash_qrehash_1Dint4_bool        
 !               James H. Thorpe
 !               June 18, 2018
