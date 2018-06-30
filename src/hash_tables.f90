@@ -116,7 +116,7 @@ MODULE hash_tables
     LOGICAL, INTENT(IN) :: val
     INTEGER(KIND=4) :: j,k,i,l
 
-    IF ( 1.0E0*q/n .GT. 0.5E0) CALL hash_qrehash_1Dint4_bool(A,B,C,n,hash_1Dint4)
+    IF ( 1.0E0*q/n .GT. 0.49E0) CALL hash_qrehash_1Dint4_bool(A,B,C,n,hash_1Dint4)
 
     !get initial guess index
     idx = hash_1Dint4(key)
@@ -184,17 +184,21 @@ MODULE hash_tables
     LOGICAL, INTENT(IN) :: val
     INTEGER(KIND=4) :: j,k,i,l
 
-    IF ( 1.0E0*q/n .GT. 0.5E0) CALL hash_qrehash_1Dint4_bool(A,B,C,n,hash_1Dint4)
+    IF ( 1.0E0*q/n .GT. 0.49E0) CALL hash_qrehash_1Dint4_bool(A,B,C,n,hash_1Dint4)
 
     !get initial guess index
+    !WRITE(99,*) "inserting..."
     idx = hash_1Dint4(key)
 
     j = 1    
     k = idx
     i = IAND(k,n-1) !bitwise modulus of size n=2^p, fancy stuff :) 
     l = -1
+    !WRITE(99,*) "initial ins index is...", i
 
     !find empty slot, quadratic probing 
+    !if (i .EQ. n/2) x = x + 1
+    !if (i .EQ. n/2+1) x = x + 1
     DO WHILE (A(i) .EQV. .TRUE.)
       IF ( l .EQ. i) THEN       !the full cycle has been searched, quadratic ftw
         WRITE(*,*) "myUtil:hash_qinsert_1Dint4_bool - no insertion point found"
@@ -204,9 +208,12 @@ MODULE hash_tables
       END IF
       k = k + j  
       j = j + 1
-      x = x + 1
       l = i
       i = IAND(k,n-1)
+      !TESTING
+      x = x + 1
+      !WRITE(99,*) i
+      !TESTING
     END DO 
 
     !if we got out, then we have any empty slot
@@ -251,6 +258,8 @@ MODULE hash_tables
     LOGICAL, DIMENSION(:), ALLOCATABLE:: nA,nC
     INTEGER(KIND=4), INTENT(INOUT) :: n
     INTEGER(KIND=4) :: i,m,stat,l,q
+
+    !WRITE(99,*) "rehashing"
 
     n = 2*n
     m = SIZE(B(0,:))
@@ -345,6 +354,8 @@ MODULE hash_tables
     LOGICAL, INTENT(INOUT) :: val,fnd
     INTEGER(KIND=4) :: j,k,i,l
 
+
+    !WRITE(99,*) "searching..."
     idx = hash_1Dint4(key)
     fnd = .FALSE.
 
@@ -353,8 +364,11 @@ MODULE hash_tables
     i = IAND(k,n-1) !bitwise modulus of n=2^p, fancy stuff :) 
     l = -1
 
+    ! initial search check
+    IF ( A(i) .EQV. .FALSE.) RETURN
+
     !find empty slot, quadratic probing 
-    DO WHILE ( .NOT. ALL(B(i,:) .EQ. key(:) ) )
+    DO WHILE ( .NOT. ALL(B(i,:) .EQ. key(:))  )
       IF ( l .EQ. i .OR. A(i) .EQV. .FALSE.) THEN       !the full cycle has been searched, quadratic ftw
         RETURN 
       END IF
