@@ -386,6 +386,63 @@ MODULE hash_tables
   END SUBROUTINE hash_qsearch_1Dint4_bool
 
 !---------------------------------------------------------------------
+!       hash_FNV1a_1Dint4
+!               James H. Thorpe
+!               Jul 2, 2018
+!       Simple implementation of FNV-1a hash
+!       All credit goes to the original authors, Fowler-Noll-Vo
+!       http://www.isthe.com/chongo/tech/comp/fnv/
+!       - uses a slightly smaller prime number for 32 byte SIGNED ints
+!       -Optimized for GCC -O3 compilers
+!---------------------------------------------------------------------
+  ! Varaibles
+  ! A           :       1D int4, integer array to be hashed
 
+  INTEGER(KIND=4) FUNCTION hash_FNV1a_1Dint4(A)
+    IMPLICIT NONE
+    INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: A
+    INTEGER(KIND=4) :: i,val
+
+    val = 2147483647 !the only difference, I only have 31 bits
+
+    DO i=0,SIZE(A)-1
+      ! This is for non-gfortran -O3
+      !val = IEOR(val,IBITS(A(i),0,7))*16777619
+      !val = IEOR(val,IBITS(A(i),8,7))*16777619
+      !val = IEOR(val,IBITS(A(i),16,7))*16777619
+      !val = IEOR(val,IBITS(A(i),24,7))*16777619
+
+      ! gfortran -O3 optimization
+      val = IEOR(val,IBITS(A(i),0,7))
+      val = val+ISHFT(val,1)+ISHFT(val,4)+ISHFT(val,7)+ISHFT(val,8)+ISHFT(val,24)
+      val = IEOR(val,IBITS(A(i),8,7))
+      val = val+ISHFT(val,1)+ISHFT(val,4)+ISHFT(val,7)+ISHFT(val,8)+ISHFT(val,24)
+      val = IEOR(val,IBITS(A(i),16,7))
+      val = val+ISHFT(val,1)+ISHFT(val,4)+ISHFT(val,7)+ISHFT(val,8)+ISHFT(val,24)
+      val = IEOR(val,IBITS(A(i),24,7))
+      val = val+ISHFT(val,1)+ISHFT(val,4)+ISHFT(val,7)+ISHFT(val,8)+ISHFT(val,24)
+    END DO
+
+    val = ABS(val) !a sad requirement
+    hash_FNV1a_1Dint4 = val
+  
+  END FUNCTION hash_FNV1a_1Dint4
+
+!---------------------------------------------------------------------
+!       hash_xxHash_1Dint4
+!               James H. Thorpe
+!               Jul 2, 2018
+!       My implementation of xxHash for Fortran 90
+!       All credit goes to Yann Collet, https://github.com/Cyan4973/xxHash
+!       - I use slightly smaller primes
+!       - IN PROGRESS 
+!---------------------------------------------------------------------
+  INTEGER(KIND=4) FUNCTION hash_xxHash_1Dint4(A)
+    IMPLICIT NONE
+    INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: A
+    INTEGER(KIND=4) :: p1,p2
+
+  END FUNCTION hash_xxHash_1Dint4
+!---------------------------------------------------------------------
 END MODULE hash_tables
 

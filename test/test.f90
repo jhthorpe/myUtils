@@ -57,7 +57,7 @@ PROGRAM test
 
   WRITE(*,*) "search after rehash"
   key = [0,0,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
+  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,hash_FNV1a_1Dint4)
   key = [0,24,0,42]
   call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
   key = [0,24,23,42]
@@ -68,6 +68,7 @@ PROGRAM test
   DO k=0,n
     write(*,*) B(k,:)
   end do
+
   contains
 
   integer(kind=4) function myHash2(A)
