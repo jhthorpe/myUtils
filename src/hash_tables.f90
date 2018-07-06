@@ -434,13 +434,73 @@ MODULE hash_tables
 !               Jul 2, 2018
 !       My implementation of xxHash for Fortran 90
 !       All credit goes to Yann Collet, https://github.com/Cyan4973/xxHash
-!       - I use slightly smaller primes
-!       - IN PROGRESS 
+!	And to Stephan Brumme, who's code I translated, http://create.stephan-brumme.com/xxhash/
+!       - I use slightly smaller primes that have not been tested
 !---------------------------------------------------------------------
+  ! A		:	1D int4, array of values to be hashed
+
   INTEGER(KIND=4) FUNCTION hash_xxHash_1Dint4(A)
     IMPLICIT NONE
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: A
-    INTEGER(KIND=4) :: p1,p2
+    INTEGER(KIND=4), DIMENSION(0:3) :: state
+    INTEGER(KIND=4), PARAMETER :: p1,p2,p3,p4,p5
+    INTEGER(KIND=4) :: nbytes,sizeBuff,maxBuff,s0,s1,s2,s3 
+    INTEGER(KIND=4) :: val
+    INTEGER(KIND=4) :: i
+
+    !set the primes, these need testing and changing
+    p1 = 2147475521 !this one is meh
+    p2 = 2147470769 !maybe okay
+    p3 = 2147483647 !this one is meh 
+    p4 = 668265263  !fine
+    p5 = 374761393  !fine
+
+    !initialize the state with seed 137 (why not?)
+    state(0) =  137 + p1 + p2
+    state(1) = 137 + p2
+    state(2) = 137
+    state(3) = p1 - 137    ! this will be wrong if 
+    maxBuff = 16
+    sizeBuff = 0
+    nbytes = SIZE(A)*4  !defined by array 
+    
+    !Add in data
+    DO i=0,nbytes-1
+       
+    END DO 
+
+    !Process the information streams
+    val = nbytes 
+    IF (nbytes .GE. maxBuff) THEN
+      !"fold 128 bit state into 32 bit value"
+          ! "rotate left"
+          ! (x << bits | x >> (32 - bits))
+          ! supposedly this happens in 1 CPU instruction?
+      val = val &
+        + IOR(ISHFT(state(0),1),ISHFT(state(0),-(32-1))) &
+        + IOR(ISHFT(state(1),7),ISHFT(state(1),-(32-7))) & 
+        + IOR(ISHFT(state(2),12),ISHFT(state(2),-(32-12))) & 
+        + IOR(ISHFT(state(3),18),ISHFT(state(3),-(32-18)))  
+    ELSE
+      ! "internal state wasn't set in the addition section",
+      !  so therefore the seed is in state(2)
+      ! I don't really understand this
+      val = val + state[2] + p5
+    END IF
+    
+
+    WRITE(*,*) "---------------"
+    WRITE(*,*) "xxHash_1Dint4"
+    WRITE(*,*) "Things to check"
+    WRITE(*,*) "1) additions of primes 1&2 are within range"
+    WRITE(*,*) "2) rotate left uses IOR and not IEOR"
+    WRITE(*,*) "3) rotate left using left and right shift correctly"
+    WRITE(*,*) "4) state 3 is defined correctly"
+    WRITE(*,*) 
+    WRITE(*,*) "Things to do"
+    WRITE(*,*) "Add data section"
+
+    STOP "must adress above problems"
 
   END FUNCTION hash_xxHash_1Dint4
 !---------------------------------------------------------------------
