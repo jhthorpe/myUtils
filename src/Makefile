@@ -6,7 +6,7 @@ LC=ar
 
 .PHONY: all
 
-objects = dynamic_arrays.o dynamic_arrays.mod hello.o hello.mod hash_tables.o hash_tables.mod myUtils.o myUtils.mod 
+objects = dynamic_arrays.o dynamic_arrays.mod hello.o hello.mod hash_tables.o hash_tables.mod monte_carlo.o monte_carlo.mod myUtils.o myUtils.mod 
 
 all: $(objects) 
 
@@ -22,6 +22,10 @@ hash_tables.o : hash_tables.f90
 	$(FC) $(FFLAGS) -c hash_tables.f90
 hash_tables.mod : hash_tables.f90 hash_tables.o
 	$(FC) $(FFLAGS) -c hash_tables.f90
+monte_carlo.o : monte_carlo.f90
+	$(FC) $(FFLAGS) -c monte_carlo.f90
+monte_carlo.mod : monte_carlo.f90 monte_carlo.o
+	$(FC) $(FFLAGS) -c monte_carlo.f90
 myUtils.o : myUtils.f90
 	$(FC) $(FFLAGS) -c myUtils.f90
 myUtils.mod : myUtils.f90 myUtils.o
