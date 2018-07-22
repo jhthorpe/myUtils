@@ -1,84 +1,41 @@
 PROGRAM test
   USE myUtils
   IMPLICIT NONE
-  integer(kind=4), dimension(:,:) , allocatable :: B
-  logical, dimension(:),allocatable :: A,C 
-  integer(kind=4), dimension(:), allocatable :: key
-  logical :: val,fnd
-  integer :: k,n,m,q,loc
-
-
-  n = 10
-  m = 4
-  val = .TRUE.
-  call hash_qinit_1Dint4_bool(A,B,C,n,m)
-  WRITE(*,*) SIZE(A(:))
-  WRITE(*,*) SIZE(B(:,0))
-  WRITE(*,*) SIZE(B(0,:))
-  WRITE(*,*) SIZE(C(:))
-
-  allocate(key(0:m-1))
-  CALL int4_1Dzero(key)
-  key(3) = 42
-  write(*,*) "key is:", key
-  WRITE(*,*) "key is..."
-  WRITE(*,*) key
-  write(*,*) 
   
-  q = 2
-  loc = 0
-  call hash_qinsert_1Dint4_bool(A,B,C,key,val,loc,n,q,myHash2)
-  key(1) = 24
-  q = q + 1
-  loc = 1
-  call hash_qinsert_1Dint4_bool(A,B,C,key,val,loc,n,q,myHash2)
-  key(2) = 23
-  q = q + 1
-  loc = 2
-  call hash_qinsert_1Dint4_bool(A,B,C,key,val,loc,n,q,myHash2)
+  REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: A,S,T
+  REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: V,W,X,Y
+  INTEGER(KIND=4) :: n,m,i,j
 
+  n = 2
+  m = 2
 
-  WRITE(*,*) 
-  write(*,*) "B(i,:) is"
-  DO k=0,n
-    write(*,*) B(k,:)
-  end do
-  WRITE(*,*)
+  ALLOCATE(A(0:n-1,0:n-1))
+  ALLOCATE(S(0:m-1,0:n-1))
+  ALLOCATE(T(0:m-1,0:m-1))
+  ALLOCATE(V(0:n-1))
+  ALLOCATE(W(0:n-1))
+  ALLOCATE(X(0:n-1))
+  ALLOCATE(Y(0:n-1))
 
-  WRITE(*,*) "search before rehash"
-  key = [0,0,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
-  key = [0,24,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
-  key = [0,24,23,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
+  A(0,0) = 1
+  A(1,0) = 0
+  A(0,1) = 0
+  A(1,1) = 2 
 
-  call hash_qrehash_1Dint4_bool(A,B,C,n,myHash2)
+  V(0) = 0.5D0
+  V(1:n-1) = (/ (0.0D0, i=1,n-1) /)
+  CALL linal_lanczos_symreal_2Dreal8(A,n,m,V,W,X,S,T)
 
-  WRITE(*,*) "search after rehash"
-  key = [0,0,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,hash_FNV1a_1Dint4)
-  key = [0,24,0,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
-  key = [0,24,23,42]
-  call hash_qsearch_1Dint4_bool(A,B,C,key,val,loc,n,fnd,myHash2)
-
-  write(*,*) 
-  write(*,*) "B(k,:) is"
-  DO k=0,n
-    write(*,*) B(k,:)
-  end do
-
-  contains
-
-  integer(kind=4) function myHash2(A)
-    implicit none
-    integer(kind=4), dimension(0:), intent(IN) :: A
-    
-    myHash2 = A(2)+1
-
-  end function myHash2
-
+  WRITE(*,*) "S is:"
+  do i=0,n-1
+    write(*,*) S(:,i)
+  end do  
   
-END PROGRAM
+  write(*,*) 
+  WRITE(*,*) "T is:"
+  do i=0,m-1
+    write(*,*) T(:,i)
+  end do
+  
 
+END PROGRAM test
