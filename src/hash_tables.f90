@@ -443,7 +443,7 @@ MODULE hash_tables
     IMPLICIT NONE
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: A
     INTEGER(KIND=4), DIMENSION(0:3) :: state
-    INTEGER(KIND=4), PARAMETER :: p1,p2,p3,p4,p5
+    INTEGER(KIND=4) :: p1,p2,p3,p4,p5
     INTEGER(KIND=4) :: nbytes,sizeBuff,maxBuff,s0,s1,s2,s3 
     INTEGER(KIND=4) :: val
     INTEGER(KIND=4) :: i
@@ -485,7 +485,7 @@ MODULE hash_tables
       ! "internal state wasn't set in the addition section",
       !  so therefore the seed is in state(2)
       ! I don't really understand this
-      val = val + state[2] + p5
+      val = val + state(2) + p5
     END IF
     
 
