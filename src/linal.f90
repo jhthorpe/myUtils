@@ -107,7 +107,7 @@ MODULE linal
 
     temp = 0.0D0
     DO i=0, n-1
-      temp = temp + A(i)**2 
+      temp = temp + A(i)**2.0D0 
     END DO 
    
     temp = SQRT(temp)

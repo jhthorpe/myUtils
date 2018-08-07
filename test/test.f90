@@ -22,7 +22,7 @@ PROGRAM test
   A(0,1) = 0
   A(1,1) = 2 
 
-  V(0) = 0.5D0
+  V(0) = 1.0D0
   V(1:n-1) = (/ (0.0D0, i=1,n-1) /)
   CALL linal_lanczos_symreal_2Dreal8(A,n,m,V,W,X,S,T)
 
