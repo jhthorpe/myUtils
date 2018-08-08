@@ -10,6 +10,8 @@
 !       linal_operation_matType_dataType
 !       example: Lanczos eigenvalues of a Hermitian 2D real*8 matrix 
 !               linal_lanczos_hermitian_2Dreal8
+!
+!	IMPORTANT NOTE : here I am assuming column major arrays
 
 MODULE linal
   USE dynamic_arrays
@@ -26,6 +28,7 @@ MODULE linal
 !	- Currently uses my implementation of matrix vector multiplication
 !	- DGEM would be prefered, and should perhaps be replaced
 !	- T = S*AS
+!	- on exit, Td hold the eigenvalues in increasing order
 !---------------------------------------------------------------------
   ! Values
   ! A		:	2D real8, nxn symetric, real valued array to be tridiagonalized
@@ -35,20 +38,24 @@ MODULE linal
   ! W		:	1D real8, length n working vector
   ! X		:	1D real8, length n working vector
   ! S		:	2D real8, nxm (row x col) colomns of X's 
-  ! T		:	2D real8, mxm tridiagonal	
+  ! Td		:	2D real8, m element vector of diagonals	
+  ! Ts		:	1D real8, m-1 element vector of subdiagonals
 
-  SUBROUTINE linal_lanczos_symreal_2Dreal8(A,n,m,V,W,X,S,T)
+  SUBROUTINE linal_lanczos_symreal_2Dreal8(A,n,m,V,W,X,S,Td,Ts)
     IMPLICIT NONE
     REAL(KIND=8), PARAMETER :: tol=1.0D-16
-    REAL(KIND=8), DIMENSION(0:,0:), INTENT(INOUT) :: S,T
+    REAL(KIND=8), DIMENSION(0:,0:), INTENT(INOUT) :: S
     REAL(KIND=8), DIMENSION(0:,0:), INTENT(IN) :: A    
-    REAL(KIND=8), DIMENSION(0:), INTENT(INOUT) :: V,W,X
+    REAL(KIND=8), DIMENSION(0:), INTENT(INOUT) :: V,W,X,Td,Ts
     INTEGER(KIND=4), INTENT(IN) :: n,m
     
-    INTEGER(KIND=4) :: i,j
+    REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: evec
+    REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: diag,work,iwork
+    INTEGER(KIND=4) :: i,j,lwork,liwork,info
     REAL(KIND=8) :: b,c
 
-    CALL real8_2Dzero(T)
+    Td = 0
+    Ts = 0
 
     !check input vector has Euclidian norm of 1
     b = linal_eunorm_1Dreal8(V,n) 
@@ -62,27 +69,48 @@ MODULE linal
     c = SUM(W*V) !this works because we are real valued
     X = W - c*V
     S(0,:) = V
-    T(0,0) = c
+    Td(0) = c
 
     DO i=1,m-1
       b = linal_eunorm_1Dreal8(X,n)
-      IF (ABS(b - 0.0D0) .LT. tol) THEN
+      IF (ABS(b - 0.0D0) .GT. tol) THEN
         V = X/b
       ELSE
-        !this is currently broken, and should be fixed
-        V = (/ (0.0D0, j=0,n-1) /)
-        V(1) = 1.0D0
-        IF ( j .GT. 1) STOP "We have gone beyond my hardcoded case"
+        ! add a new vector that is orthonormal to the others
+        CALL linal_onvec_2Dreal8(S(0:i-1,:),V,n,i)
+        WRITE(*,*) "new vector: ", V
       END IF
       W = MATMUL(A,V)
       c = SUM(W*V) !this works because we are real valued 
       X = W - c*V-b*S(i-1,:)
       S(i,:) = V
-      T(i,i) = c
-      T(i-1,i) = b 
-      T(i,i-1) = b
+      Td(i) = c
+      Ts(i-1) = b 
     END DO 
 
+    !Now we have our tridiagonal matrix, we must get the eigenvalues
+    !Currently using LAPACK, though this could probably be self coded
+
+    !allocate memory and find best size for arrays
+    !ALLOCATE(evec,(0:m-1,0:n-1))
+    ALLOCATE(evec(0:1,0:1))
+    ALLOCATE(work(0:1))
+    ALLOCATE(iwork(0:1))
+    CALL DSTEDC('N',m,Td,Ts,evec,m,work,-1,iwork,-1,info)
+
+    lwork = CEILING(MAX(1.0,work(0)))
+    liwork = CEILING(MAX(1.0,iwork(0)))
+    DEALLOCATE(work)
+    DEALLOCATE(iwork)
+    ALLOCATE(work(0:lwork-1))
+    ALLOCATE(iwork(0:liwork-1))
+
+    CALL DSTEDC('N',m,Td,Ts,evec,m,work,lwork,iwork,liwork,info)
+
+    DEALLOCATE(evec)
+    DEALLOCATE(work)
+    DEALLOCATE(iwork)
+   
   END SUBROUTINE linal_lanczos_symreal_2Dreal8
 
 !---------------------------------------------------------------------
@@ -114,6 +142,73 @@ MODULE linal
     linal_eunorm_1Dreal8 = temp
 
   END FUNCTION linal_eunorm_1Dreal8
+
+!---------------------------------------------------------------------
+!	linal_onvec_2Dreal8
+!		James H. Thorpe
+!		August 8, 2018
+!	- subroutine that finds a vector orthonormal to set of vectors
+!	- Array A stores m, n element vectors, and v is the output new vector
+!	- uses Gram Schmidt process
+!	- assumes that all vectors are themselves already orthonormal
+!---------------------------------------------------------------------
+  ! Values
+  ! A(m,n)	:	2D real8, n-row m-col array of current set 
+  ! v		:	1D real8, n element vector to be orthogonalized
+  ! n		:	int4, number of rows
+  ! m		:	int4, number of vectors we already have
+
+  SUBROUTINE linal_onvec_2Dreal8(A,v,n,m)
+    IMPLICIT NONE
+    REAL(KIND=8), DIMENSION(0:,0:), INTENT(IN) :: A
+    REAL(KIND=8), DIMENSION(0:), INTENT(INOUT) :: v
+    INTEGER(KIND=4), INTENT(IN) :: n,m
+
+    INTEGER(KIND=4) :: i
+ 
+    IF (m .GT. n) THEN
+      WRITE(*,*) "linal_onvec_2Dreal8 : WARNING - you are creating a linearly dependent set" 
+      STOP 
+    END IF
+
+    v = 0.0D0
+    v(m) = 1.0D0
+
+    ! go through all currect vectors
+    ! note that I *could* assume dot product of A(i) with itself is 1, but
+    !   I want to account for numerical problems
+    DO i=0,m-1
+      v = v - SUM(A(i,:)*v)/SUM(A(i,:)*A(i,:))*A(i,:)
+    END DO 
+
+    !normalize
+    v = v/SUM(v)
+
+  END SUBROUTINE linal_onvec_2Dreal8
+
+!---------------------------------------------------------------------
+!	linal_proj_1Dreal8
+!		James H. Thorpe
+!		August 8, 2018
+!	- subroutine that performs projection operation of vector v onto u
+!	- result is stored in vector w
+!---------------------------------------------------------------------
+  ! Values
+  ! u		:	1D real8, vector to be projected upon
+  ! v		:	1D real8, vector that is projected
+  ! w		:	1D real8, resulting vector of the projection
+  ! n		:	int4, number of elements
+
+  SUBROUTINE linal_proj_1Dreal8(u,v,w,n)
+    IMPLICIT NONE
+    REAL(KIND=8), DIMENSION(0:), INTENT(INOUT) :: w 
+    REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: u,v
+    INTEGER(KIND=4), INTENT(IN) :: n
+    
+    w = SUM(u*v)/SUM(u*u)*u
+
+  END SUBROUTINE linal_proj_1Dreal8
+
 !---------------------------------------------------------------------
 
 END MODULE linal

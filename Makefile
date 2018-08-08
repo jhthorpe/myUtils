@@ -3,6 +3,7 @@ FC=gfortran
 FFLAGS=-O3 -fcheck=bounds
 LFLAGS=-rcs
 LC=ar
+LAPACK= -L/Users/jamesthorpe/LAPACK/lapack-3.7.0 -llapack -lblas
 
 SRC_DIR := ./src
 LIB_DIR := ./lib
@@ -37,8 +38,7 @@ all:
 	if [ ! -d $(LIB_DIR) ]; then mkdir -p $(LIB_DIR); fi 
 	cp $(SRC_DIR)/*.mod $(LIB_DIR)
 	$(LC) $(LFLAGS) $(LIB_DIR)/myUtils.a $(OBJ_FILES)
-	$(FC) $(FFLAGS) -o ./test/test.o ./test/test.f90 $(LIB_DIR)/myUtils.a -I$(LIB_DIR) 
-
+	$(FC) $(FFLAGS) -o ./test/test.o ./test/test.f90 $(LIB_DIR)/myUtils.a -I$(LIB_DIR) $(LAPACK)
 clean: 
 	rm -f $(SRC_DIR)/*.o $(SRC_DIR)/*.mod
 

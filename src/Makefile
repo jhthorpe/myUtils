@@ -2,6 +2,7 @@ FC=gfortran
 #FC=ifort
 FFLAGS=-O3 -fcheck=bounds
 LFLAGS=-rcs
+LAPACK= -L/Users/jamesthorpe/LAPACK/lapack-3.7.0 -llapack -lblas
 LC=ar
 
 .PHONY: all
@@ -23,9 +24,9 @@ hash_tables.o : hash_tables.f90
 hash_tables.mod : hash_tables.f90 hash_tables.o
 	$(FC) $(FFLAGS) -c hash_tables.f90
 linal.o : linal.f90
-	$(FC) $(FFLAGS) -c linal.f90
+	$(FC) $(FFLAGS) -c linal.f90 $(LAPACK)
 linal.mod : linal.f90 linal.o
-	$(FC) $(FFLAGS) -c linal.f90
+	$(FC) $(FFLAGS) -c linal.f90 $(LAPACK)
 monte_carlo.o : monte_carlo.f90
 	$(FC) $(FFLAGS) -c monte_carlo.f90
 monte_carlo.mod : monte_carlo.f90 monte_carlo.o

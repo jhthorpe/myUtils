@@ -30,3 +30,13 @@ Currently supported hash functions:
   
 A note about hash functions...  
 The quadtractically probed hash functions here are of a special kind. The tables are dynamically resized so that they are always a power of two. This allows us to use fancy bitops to perform expensive modulus operations, and it guarentees that an empty slot will always be found. It should be noted that the table dynamically resizes at a load factor of 0.5, which I am not sure is ideal! 
+
+## Linear Algebra
+A set of functions and subroutines that perform linear algebra. Of specific note is the implimentation of the Lanczos algorithm fora set number of lowest eigenvalues. 
+Syntax:
+	linal_operation_dataType
+Currently supported functions:
+- linal_lanczos_2Dreal8		:	find lowest m eigenvalues and eigenvectors of a symmetric, real matrix
+- linal_eunorm_1Dreal8		:	find Euclidian norm of a 1D real vector
+- linal_onvec_2Dreal8		:	finds a vector orthonormal to a current set of (what are assumed to be) othogonol vectors
+- linal_proj_1Dreal8		:	determines the projection of one real8 vector upon another

@@ -1,1 +1,1 @@
-Compile with 'make all'. 
+Compile with 'make all'. Provide linker to LAPACK in Makefile - src/Makefile
