@@ -6,6 +6,10 @@ PROGRAM test
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: A,S
   REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: V,W,X,Y,Td,Ts
   INTEGER(KIND=4) :: n,m,i,j
+  REAL(KIND=8) :: t1,t2
+
+  REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: WORK,wshit
+  INTEGER :: LWORK, INFO
 
   !gs
   REAL(KIND=8), DIMENSION(0:2,0:2) :: B
@@ -13,8 +17,8 @@ PROGRAM test
 
   !testing lanczos
 
-  n = 3
-  m = 2
+  n = 10
+  m = 3
 
   ALLOCATE(A(0:n-1,0:n-1))
   ALLOCATE(S(0:m-1,0:n-1))
@@ -25,27 +29,63 @@ PROGRAM test
   ALLOCATE(X(0:n-1))
   ALLOCATE(Y(0:n-1))
 
+  LWORK=50000
+  ALLOCATE(wshit(0:n-1))
+  ALLOCATE(WORK(0:LWORK-1))
+
   !A = TRANSPOSE(RESHAPE((/ 93,57,93,57,2,12,93,12,19/),(/n,n/)))
-  A = TRANSPOSE(RESHAPE((/ 25,1,0,1,32,0,0,0,93/),(/n,n/)))
- 
+  !A = TRANSPOSE(RESHAPE((/ 25,1,0,1,32,0,0,0,93/),(/n,n/)))
+
   DO i=0,n-1
-      WRITE(*,*) A(:,i)
+    A(i,i) = (RAND()-0.5)*100.0D0
+    DO j=i+1,n-1
+      A(i,j) = (RAND()-0.5)*0.1D0
+      A(j,i) = A(i,j) 
+    END DO
   END DO
+ 
+  !DO i=0,n-1
+  !    WRITE(*,*) A(:,i)
+  !END DO
 
   V(0) = 1.0D0
   V(1:n-1) = (/ (0.0D0, i=1,n-1) /)
-  CALL linal_lanczos_symreal_2Dreal8(A,n,m,V,W,X,S,Td,Ts)
 
-  WRITE(*,*) "S is:"
-  do i=0,n-1
-    write(*,*) S(:,i)
-  end do  
+  call CPU_TIME(t1)
+  CALL linal_lanczos_symreal_2Dreal8(A,n,m,V,W,X,S,Td,Ts)
+  call CPU_TIME(t2)
+
+  !WRITE(*,*) "S is:"
+  !#do i=0,n-1
+  !  write(*,*) S(:,i)
+  !end do  
   
   write(*,*) 
   WRITE(*,*) "eigenvalues are"
   do i=0,m-1
     write(*,*) Td(i)
   end do
+  write(*,*)
+  write(*,*) "eigenvectors are"
+  
+  write(*,*) 
+  WRITE(*,*) "my code finished in:", t2-t1 
+
+  DO i=0,n-1
+    DO j=0,i-1
+      A(i,j) = 0.0D0
+    END DO
+  END DO
+
+  call cpu_time(t1)
+  CALL dsyev('N','U',n,A,n,wshit,WORK,LWORK,INFO) 
+  call cpu_time(t2)
+  WRITE(*,*) "The actual values are"
+  DO i=0,m-1
+    WRITE(*,*) wshit(i)
+  END DO
+  WRITE(*,*) 
+  WRITE(*,*) "lapack finished in", t2-t1
 
   ! testing GS
   !WRITE(*,*) 
@@ -77,5 +117,8 @@ PROGRAM test
 
   !WRITE(*,*) 
   !WRITE(*,*) SUM(aba*gaba)/SUM(gaba*gaba)*gaba 
+
+  DEALLOCATE(wshit)
+  DEALLOCATE(WORK)
 
 END PROGRAM test

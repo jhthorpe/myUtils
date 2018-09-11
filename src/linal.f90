@@ -29,6 +29,7 @@ MODULE linal
 !	- DGEM would be prefered, and should perhaps be replaced
 !	- T = S*AS
 !	- on exit, Td hold the eigenvalues in increasing order
+!	- on exit, V holds the eigenvectors in increasing order
 !---------------------------------------------------------------------
   ! Values
   ! A		:	2D real8, nxn symetric, real valued array to be tridiagonalized
@@ -92,11 +93,10 @@ MODULE linal
     !Currently using LAPACK, though this could probably be self coded
 
     !allocate memory and find best size for arrays
-    !ALLOCATE(evec,(0:m-1,0:n-1))
-    ALLOCATE(evec(0:1,0:1))
+    ALLOCATE(evec(0:m-1,0:n-1))
     ALLOCATE(work(0:1))
     ALLOCATE(iwork(0:1))
-    CALL DSTEDC('N',m,Td,Ts,evec,m,work,-1,iwork,-1,info)
+    CALL DSTEDC('Y',m,Td,Ts,evec,m,work,-1,iwork,-1,info)
 
     lwork = CEILING(MAX(1.0,work(0)))
     liwork = CEILING(MAX(1.0,iwork(0)))
@@ -105,7 +105,11 @@ MODULE linal
     ALLOCATE(work(0:lwork-1))
     ALLOCATE(iwork(0:liwork-1))
 
-    CALL DSTEDC('N',m,Td,Ts,evec,m,work,lwork,iwork,liwork,info)
+    !get eigenvalues
+    CALL DSTEDC('Y',m,Td,Ts,evec,m,work,lwork,iwork,liwork,info)
+
+    !get eigenvectors
+    
 
     DEALLOCATE(evec)
     DEALLOCATE(work)
