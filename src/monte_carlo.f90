@@ -51,7 +51,7 @@ MODULE monte_carlo
 
     
 
-  END FUNCTION mc_metrop_real8
+  END FUNCTION mc_metrop_real8_real8
 
 
   
